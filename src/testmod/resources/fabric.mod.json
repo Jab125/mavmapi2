@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "mavapi-test",
+  "version": "1",
+  "name": "YACL Testmod",
+  "description": "",
+  "authors": [
+    "isXander"
+  ],
+  "contact": {
+    "homepage": "https://isxander.dev",
+    "issues": "https://github.com/${github}/issues",
+    "sources": "https://github.com/${github}"
+  },
+  "license": "LGPL-3.0-or-later",
+  "environment": "*",
+  "depends": {
+    "mavapi": "*"
+  },
+  "mixins": [
+
+  ],
+  "entrypoints": {
+    "client": [
+
+    ]
+  },
+  "custom": {
+    "modmenu": {
+      "badges": ["library"]
+    }
+  }
+}

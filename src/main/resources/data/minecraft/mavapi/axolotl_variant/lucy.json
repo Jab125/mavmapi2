@@ -1,0 +1,9 @@
+{
+  "asset_id": "minecraft:entity/axolotl/axolotl_lucy",
+  "model": "normal",
+  "spawn_conditions": [
+    {
+      "priority": 0
+    }
+  ]
+}
