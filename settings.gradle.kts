@@ -32,4 +32,4 @@ stonecutter {
 //        mc("1.21.1", loaders = listOf("fabric", "neoforge"))
     }
 }
-rootProject.name = "YetAnotherConfigLib"
+rootProject.name = "mavapi"
