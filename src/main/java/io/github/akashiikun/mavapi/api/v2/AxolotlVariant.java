@@ -35,12 +35,12 @@ public record AxolotlVariant(ModelAndTexture<ModelType> modelAndTexture, SpawnPr
 	}
 
 	static {
-		CODEC = RegistryFixedCodec.create(dumptodoremakelater.COW_VARIANT);
-		STREAM_CODEC = ByteBufCodecs.holderRegistry(dumptodoremakelater.COW_VARIANT);
+		CODEC = RegistryFixedCodec.create(MavApiRegistries.AXOLOTL_VARIANT);
+		STREAM_CODEC = ByteBufCodecs.holderRegistry(MavApiRegistries.AXOLOTL_VARIANT);
 	}
 
 	// todo: really unsure about this one
-	public static enum ModelType implements StringRepresentable {
+	public enum ModelType implements StringRepresentable {
 		NORMAL("normal");
 		//COLD("cold"),
 		//WARM("warm");

@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class AxolotlRendererMixin {
 	/**
 	 * @author Jab125
-	 * @reason There's no keeping compat here
+	 * @reason There's no keeping compat here, this keeps our intentions clear.
 	 */
 	@Overwrite
 	public Identifier getTextureLocation(AxolotlRenderState axolotlRenderState) {
