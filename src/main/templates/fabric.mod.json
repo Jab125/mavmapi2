@@ -12,7 +12,7 @@
     "issues": "https://github.com/${github}/issues",
     "sources": "https://github.com/${github}"
   },
-  "icon": "yacl-128x.png",
+  "icon": "icon.png",
   "license": "${mod_license}",
   "environment": "*",
   "depends": {

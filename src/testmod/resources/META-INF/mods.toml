@@ -8,10 +8,6 @@ modId = "yacl_test"
 version = "1"
 displayName = "YACL Testmod"
 description = '''
-Test mod for YACL
+Test mod for More Axolotl Variants API
 '''
-authors = "isXander"
-
-[[mixins]]
-config = "yacl-test.mixins.json"
-
+authors = ""

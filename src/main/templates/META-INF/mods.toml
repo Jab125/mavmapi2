@@ -11,7 +11,7 @@ authors = "${mod_author}"
 description = '''
 ${mod_description}
 '''
-logoFile = "yacl-128x.png"
+logoFile = "icon.png"
 
 [["dependencies.${mod_id}"]]
 modId = "forge"
