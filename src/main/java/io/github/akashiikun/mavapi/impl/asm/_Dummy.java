@@ -10,6 +10,12 @@ import org.jspecify.annotations.Nullable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+
+/*
+ * Crossplatform way of getting the names of classes and methods, since NeoForge has no API for looking up mappings.
+ * When using Arch Loom with non-Mojmap mappings, NeoForge may use mappings other than Mojang's official ones.
+ */
+@SuppressWarnings({"DataFlowIssue", "NullableProblems", "unused"})
 public class _Dummy extends Axolotl {
 	@Retention(RetentionPolicy.CLASS)
 	@interface Name {
@@ -20,7 +26,6 @@ public class _Dummy extends Axolotl {
 	public _Dummy() {
 		super(null, null);
 	}
-
 
 	@Name("readAdditionalSaveData")
 	@Override
