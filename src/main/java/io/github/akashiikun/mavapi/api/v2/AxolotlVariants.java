@@ -49,7 +49,7 @@ public class AxolotlVariants {
 	private static Holder<AxolotlVariant> getSpawnVariant(RegistryAccess registryAccess, RandomSource random, boolean common) {
 		//noinspection unchecked
 		Holder<AxolotlVariant>[] array = registryAccess.lookupOrThrow(MavApiRegistries.AXOLOTL_VARIANT).entrySet().stream().filter(variant -> common != variant.getValue().rare()).map(a -> registryAccess.getOrThrow(a.getKey())).toArray(Holder.Reference[]::new);
-		for (Map.Entry<ResourceKey<AxolotlVariant>, AxolotlVariant> resourceKeyAxolotlVariantEntry : registryAccess.lookupOrThrow(MavApiRegistries.AXOLOTL_VARIANT).entrySet()) {
+		if (false) for (Map.Entry<ResourceKey<AxolotlVariant>, AxolotlVariant> resourceKeyAxolotlVariantEntry : registryAccess.lookupOrThrow(MavApiRegistries.AXOLOTL_VARIANT).entrySet()) {
 			System.err.println(resourceKeyAxolotlVariantEntry);
 		}
 		return Util.getRandom(array, random);
