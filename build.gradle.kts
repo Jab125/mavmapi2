@@ -124,7 +124,6 @@ modstitch {
         addMixinsToModManifest = true
 
         configs.register("mavapi")
-        if (isFabric) configs.register("mavapi-fabric")
     }
 
     createProxyConfigurations(testmod.get())
