@@ -8,26 +8,27 @@ package io.github.akashiikun.mavapi.api.v2;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
+
+import net.minecraft.core.ClientAsset;
 import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryFixedCodec;
-import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.entity.variant.ModelAndTexture;
 import net.minecraft.world.entity.variant.PriorityProvider;
 import net.minecraft.world.entity.variant.SpawnCondition;
 import net.minecraft.world.entity.variant.SpawnContext;
 import net.minecraft.world.entity.variant.SpawnPrioritySelectors;
 
-public record AxolotlVariant(ModelAndTexture<ModelType> modelAndTexture, SpawnPrioritySelectors spawnConditions) implements PriorityProvider<SpawnContext, SpawnCondition> {
-	public static final Codec<AxolotlVariant> DIRECT_CODEC = RecordCodecBuilder.create((p_481302_) -> p_481302_.group(ModelAndTexture.codec(AxolotlVariant.ModelType.CODEC, AxolotlVariant.ModelType.NORMAL).forGetter(AxolotlVariant::modelAndTexture), SpawnPrioritySelectors.CODEC.fieldOf("spawn_conditions").forGetter(AxolotlVariant::spawnConditions)).apply(p_481302_, AxolotlVariant::new));
-	public static final Codec<AxolotlVariant> NETWORK_CODEC = RecordCodecBuilder.create((p_479441_) -> p_479441_.group(ModelAndTexture.codec(AxolotlVariant.ModelType.CODEC, AxolotlVariant.ModelType.NORMAL).forGetter(AxolotlVariant::modelAndTexture)).apply(p_479441_, AxolotlVariant::new));
+public record AxolotlVariant(ClientAsset.ResourceTexture assetInfo, SpawnPrioritySelectors spawnConditions, boolean rare) implements PriorityProvider<SpawnContext, SpawnCondition> {
+	public static final Codec<AxolotlVariant> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(ClientAsset.ResourceTexture.DEFAULT_FIELD_CODEC.forGetter(AxolotlVariant::assetInfo), SpawnPrioritySelectors.CODEC.fieldOf("spawn_conditions").forGetter(AxolotlVariant::spawnConditions), Codec.BOOL.optionalFieldOf("rare", false).forGetter(AxolotlVariant::rare)).apply(instance, AxolotlVariant::new));
+	// this is from the server to the client?
+	public static final Codec<AxolotlVariant> NETWORK_CODEC = RecordCodecBuilder.create(instance -> instance.group(ClientAsset.ResourceTexture.DEFAULT_FIELD_CODEC.forGetter(AxolotlVariant::assetInfo)).apply(instance, AxolotlVariant::new));
 	public static final Codec<Holder<AxolotlVariant>> CODEC;
 	public static final StreamCodec<RegistryFriendlyByteBuf, Holder<AxolotlVariant>> STREAM_CODEC;
 
-	private AxolotlVariant(ModelAndTexture<ModelType> modelAndTexture) {
-		this(modelAndTexture, SpawnPrioritySelectors.EMPTY);
+	private AxolotlVariant(ClientAsset.ResourceTexture assetInfo) {
+		this(assetInfo, SpawnPrioritySelectors.EMPTY, false);
 	}
 
 	public List<PriorityProvider.Selector<SpawnContext, SpawnCondition>> selectors() {
@@ -37,23 +38,5 @@ public record AxolotlVariant(ModelAndTexture<ModelType> modelAndTexture, SpawnPr
 	static {
 		CODEC = RegistryFixedCodec.create(MavApiRegistries.AXOLOTL_VARIANT);
 		STREAM_CODEC = ByteBufCodecs.holderRegistry(MavApiRegistries.AXOLOTL_VARIANT);
-	}
-
-	// todo: really unsure about this one
-	public enum ModelType implements StringRepresentable {
-		NORMAL("normal");
-		//COLD("cold"),
-		//WARM("warm");
-
-		public static final Codec<ModelType> CODEC = StringRepresentable.fromEnum(ModelType::values);
-		private final String name;
-
-		private ModelType(String name) {
-			this.name = name;
-		}
-
-		public String getSerializedName() {
-			return this.name;
-		}
 	}
 }

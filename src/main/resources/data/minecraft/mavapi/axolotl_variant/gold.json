@@ -1,6 +1,5 @@
 {
   "asset_id": "minecraft:entity/axolotl/axolotl_gold",
-  "model": "normal",
   "spawn_conditions": [
     {
       "priority": 0

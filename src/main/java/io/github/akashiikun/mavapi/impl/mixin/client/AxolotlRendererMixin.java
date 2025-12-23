@@ -21,7 +21,7 @@ public class AxolotlRendererMixin {
 	 */
 	@Overwrite
 	public Identifier getTextureLocation(AxolotlRenderState axolotlRenderState) {
-		return ((AxolotlRenderStateExtension) axolotlRenderState).getVariant() == null ? MissingTextureAtlasSprite.getLocation() : ((AxolotlRenderStateExtension) axolotlRenderState).getVariant().modelAndTexture().asset().texturePath();
+		return ((AxolotlRenderStateExtension) axolotlRenderState).getVariant() == null ? MissingTextureAtlasSprite.getLocation() : ((AxolotlRenderStateExtension) axolotlRenderState).getVariant().assetInfo().texturePath();
 	}
 
 	@Inject(method = "extractRenderState(Lnet/minecraft/world/entity/animal/axolotl/Axolotl;Lnet/minecraft/client/renderer/entity/state/AxolotlRenderState;F)V", at = @At("RETURN"))

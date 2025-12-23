@@ -5,6 +5,7 @@
 
 package io.github.akashiikun.mavapi.api.v2;
 
+import net.minecraft.core.ClientAsset;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryAccess;
@@ -22,6 +23,7 @@ import net.minecraft.world.entity.variant.SpawnPrioritySelectors;
 import net.minecraft.world.level.biome.Biome;
 
 import java.util.Arrays;
+import java.util.Map;
 
 @SuppressWarnings("NullableProblems")
 public class AxolotlVariants {
@@ -36,23 +38,6 @@ public class AxolotlVariants {
         return ResourceKey.create(MavApiRegistries.AXOLOTL_VARIANT, identifier);
     }
 
-	// this is for data generation, we can skip
-//    public static void bootstrap(BootstrapContext<AxolotlVariant> bootstrapContext) {
-//        register(bootstrapContext, TEMPERATE, ModelType.NORMAL, "temperate_cow", SpawnPrioritySelectors.fallback(0));
-//        register(bootstrapContext, WARM, ModelType.WARM, "warm_cow", BiomeTags.SPAWNS_WARM_VARIANT_FARM_ANIMALS);
-//        register(bootstrapContext, COLD, ModelType.COLD, "cold_cow", BiomeTags.SPAWNS_COLD_VARIANT_FARM_ANIMALS);
-//    }
-
-    private static void register(BootstrapContext<AxolotlVariant> bootstrapContext, ResourceKey<AxolotlVariant> resourceKey, AxolotlVariant.ModelType modelType, String string, TagKey<Biome> tagKey) {
-        HolderSet<Biome> holderSet = bootstrapContext.lookup(Registries.BIOME).getOrThrow(tagKey);
-        register(bootstrapContext, resourceKey, modelType, string, SpawnPrioritySelectors.single(new BiomeCheck(holderSet), 1));
-    }
-
-    private static void register(BootstrapContext<AxolotlVariant> bootstrapContext, ResourceKey<AxolotlVariant> resourceKey, AxolotlVariant.ModelType modelType, String string, SpawnPrioritySelectors spawnPrioritySelectors) {
-        Identifier identifier = Identifier.withDefaultNamespace("entity/axolotl/axolotl_" /*blame mojang*/ + string);
-        bootstrapContext.register(resourceKey, new AxolotlVariant(new ModelAndTexture<>(modelType, identifier), spawnPrioritySelectors));
-    }
-
 	public static Holder<AxolotlVariant> getCommonSpawnVariant(RegistryAccess registryAccess, RandomSource random) {
 		return getSpawnVariant(registryAccess, random, true);
 	}
@@ -63,7 +48,10 @@ public class AxolotlVariants {
 
 	private static Holder<AxolotlVariant> getSpawnVariant(RegistryAccess registryAccess, RandomSource random, boolean common) {
 		//noinspection unchecked
-		Holder<AxolotlVariant>[] array = registryAccess.lookupOrThrow(MavApiRegistries.AXOLOTL_VARIANT).entrySet().stream().filter(variant -> common != variant.getKey().equals(BLUE)).map(a -> registryAccess.getOrThrow(a.getKey())).toArray(Holder.Reference[]::new);
+		Holder<AxolotlVariant>[] array = registryAccess.lookupOrThrow(MavApiRegistries.AXOLOTL_VARIANT).entrySet().stream().filter(variant -> common != variant.getValue().rare()).map(a -> registryAccess.getOrThrow(a.getKey())).toArray(Holder.Reference[]::new);
+		for (Map.Entry<ResourceKey<AxolotlVariant>, AxolotlVariant> resourceKeyAxolotlVariantEntry : registryAccess.lookupOrThrow(MavApiRegistries.AXOLOTL_VARIANT).entrySet()) {
+			System.err.println(resourceKeyAxolotlVariantEntry);
+		}
 		return Util.getRandom(array, random);
 	}
 }

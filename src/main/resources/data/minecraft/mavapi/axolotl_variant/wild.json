@@ -1,6 +1,5 @@
 {
   "asset_id": "minecraft:entity/axolotl/axolotl_wild",
-  "model": "normal",
   "spawn_conditions": [
     {
       "priority": 0

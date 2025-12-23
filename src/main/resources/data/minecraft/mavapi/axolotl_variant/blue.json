@@ -1,9 +1,5 @@
 {
   "asset_id": "minecraft:entity/axolotl/axolotl_blue",
-  "model": "normal",
-  "spawn_conditions": [
-    {
-      "priority": -10
-    }
-  ]
+  "rare": true,
+  "spawn_conditions": []
 }

@@ -138,10 +138,8 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 	@Inject(method = "getBreedOffspring", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/axolotl/Axolotl;setPersistenceRequired()V"), cancellable = true)
 	void mavapi$applyImplicitComponent(ServerLevel level, AgeableMob otherParent, CallbackInfoReturnable<AgeableMob> cir, @Local Axolotl axolotl) {
 		Holder<AxolotlVariant> variant;
-		// TODO, this needs to be data driven!
-		Optional<Holder.Reference<AxolotlVariant>> blueAxolotlVariant;
-		if (useRareVariant(this.random) && (blueAxolotlVariant = registryAccess().get(AxolotlVariants.BLUE)).isPresent()) {
-			variant = blueAxolotlVariant.get();
+		if (useRareVariant(this.random)) {
+			variant = AxolotlVariants.getRareSpawnVariant(registryAccess(), random);
 		} else {
 			variant = this.random.nextBoolean() ? this.getVariant() : ((AxolotlExtension) otherParent).getVariant();
 		}
