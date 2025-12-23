@@ -17,14 +17,14 @@ public class AxolotlItemVariantComponentFixHelper {
 		} else {
 			// Vanilla numerical ids
 			String s = switch (optional.get().intValue()) {
-				case 1 -> "wild";
-				case 2 -> "gold";
-				case 3 -> "cyan";
-				case 4 -> "blue";
-				default -> "lucy";
+				case 1 -> "minecraft:wild";
+				case 2 -> "minecraft:gold";
+				case 3 -> "minecraft:cyan";
+				case 4 -> "minecraft:blue";
+				default -> "minecraft:lucy";
 			};
 			return data.update("minecraft:bucket_entity_data", p_397463_ -> p_397463_.remove("Variant"))
-					.set("minecraft:axolotl/variant", data.createString(s));
+					.set("mavapi:axolotl/variant", data.createString(s));
 		}
 	}
 }
