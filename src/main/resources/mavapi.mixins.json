@@ -11,6 +11,7 @@
     "AxolotlMixin",
     "AxolotlMixin$AxolotlGroupData2Mixin",
     "AxolotlMixin$AxolotlGroupDataMixin",
+    "ItemStackMixin",
     "client.AxolotlRenderStateMixin"
   ],
   "client": [
