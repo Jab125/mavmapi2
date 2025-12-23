@@ -1,0 +1,9 @@
+{
+  "asset_id": "mavapi-test:entity/axolotl/axolotl_green",
+  "model": "normal",
+  "spawn_conditions": [
+    {
+      "priority": 0
+    }
+  ]
+}

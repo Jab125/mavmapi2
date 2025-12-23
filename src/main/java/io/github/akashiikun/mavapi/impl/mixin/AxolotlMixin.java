@@ -2,6 +2,7 @@ package io.github.akashiikun.mavapi.impl.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.serialization.Codec;
 import io.github.akashiikun.mavapi.api.v2.AxolotlVariant;
 import io.github.akashiikun.mavapi.api.v2.AxolotlVariants;
@@ -17,12 +18,16 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SyncedDataHolder;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import net.minecraft.world.entity.animal.cow.Cow;
 import net.minecraft.world.entity.variant.SpawnContext;
 import net.minecraft.world.entity.variant.VariantUtils;
 import net.minecraft.world.item.ItemStack;
@@ -33,6 +38,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -40,9 +46,14 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Optional;
+
 @SuppressWarnings("NullableProblems")
 @Mixin(Axolotl.class)
 public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtension {
+	@Shadow
+	private static native boolean useRareVariant(RandomSource random);
+
 	@Unique
 	private static @Final @Mutable EntityDataAccessor<Holder<AxolotlVariant>> DATA_VARIANT_ID;
 
@@ -108,6 +119,19 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 			this.setVariant(castComponentValue(MavApiDataComponents.AXOLOTL_VARIANT, value));
 			cir.setReturnValue(true);
 		}
+	}
+
+	@Inject(method = "getBreedOffspring", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/axolotl/Axolotl;setPersistenceRequired()V"), cancellable = true)
+	void mavapi$applyImplicitComponent(ServerLevel level, AgeableMob otherParent, CallbackInfoReturnable<AgeableMob> cir, @Local Axolotl axolotl) {
+		Holder<AxolotlVariant> variant;
+		// TODO, this needs to be data driven!
+		Optional<Holder.Reference<AxolotlVariant>> blueAxolotlVariant;
+		if (useRareVariant(this.random) && (blueAxolotlVariant = registryAccess().get(AxolotlVariants.BLUE)).isPresent()) {
+			variant = blueAxolotlVariant.get();
+		} else {
+			variant = this.random.nextBoolean() ? this.getVariant() : ((AxolotlExtension) otherParent).getVariant();
+		}
+		((AxolotlExtension) axolotl).setVariant(variant);
 	}
 
 	@Redirect(method = "saveToBucketTag", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;copyFrom(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/core/component/DataComponentGetter;)V"))
