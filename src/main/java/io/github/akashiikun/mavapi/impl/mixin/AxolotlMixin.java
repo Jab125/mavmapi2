@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.serialization.Codec;
+import io.github.akashiikun.mavapi.api.v2.AxolotlHelpers;
 import io.github.akashiikun.mavapi.api.v2.AxolotlVariant;
 import io.github.akashiikun.mavapi.api.v2.AxolotlVariants;
 import io.github.akashiikun.mavapi.api.v2.MavApiDataComponents;
@@ -19,20 +20,17 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SyncedDataHolder;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
-import net.minecraft.world.entity.variant.SpawnContext;
 import net.minecraft.world.entity.variant.VariantUtils;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.spongepowered.asm.mixin.Final;
@@ -54,6 +52,9 @@ import java.util.Optional;
 public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtension {
 	@Shadow
 	private static native boolean useRareVariant(RandomSource random);
+
+	@Shadow
+	protected abstract void setVariant(Axolotl.Variant variant);
 
 	@Unique
 	private static @Final @Mutable EntityDataAccessor<Holder<AxolotlVariant>> DATA_VARIANT_ID;
@@ -89,6 +90,7 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 
 	@Inject(method = "setVariant", at = @At("HEAD"), cancellable = true)
 	void mavapi$setVariant(Axolotl.Variant variant, CallbackInfo ci) {
+		registryAccess().get(AxolotlHelpers.fromVanilla(variant)).ifPresent(this::setVariant);
 		ci.cancel();
 	}
 
@@ -112,7 +114,24 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 
 	@Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
 	void mavapi$readAdditionalSaveData(ValueInput input, CallbackInfo ci) {
-		VariantUtils.readVariant(input, MavApiRegistries.AXOLOTL_VARIANT).ifPresent(this::setVariant);
+		if (!readLegacyVariant(input)) VariantUtils.readVariant(input, MavApiRegistries.AXOLOTL_VARIANT).ifPresent(this::setVariant);
+	}
+
+	@Unique
+	private boolean readLegacyVariant(ValueInput input) {
+		Axolotl.Variant legacyVariant = input.read("Variant", Axolotl.Variant.LEGACY_CODEC).orElse(null);
+		if (legacyVariant != null) {
+			Optional<Holder.Reference<AxolotlVariant>> axolotlVariantReference = registryAccess().get(AxolotlHelpers.fromVanilla(legacyVariant));
+			axolotlVariantReference.ifPresent(this::setVariant);
+			return true; // even if this fails to set, there's a Variant so "variant" shouldn't be used.
+		}
+		Identifier mavApiV1Variant = input.read("Variant", Identifier.CODEC).orElse(null);
+		if (mavApiV1Variant != null) {
+			Optional<Holder.Reference<AxolotlVariant>> axolotlVariantReference = registryAccess().lookupOrThrow(MavApiRegistries.AXOLOTL_VARIANT).get(mavApiV1Variant);
+			axolotlVariantReference.ifPresent(this::setVariant);
+			return true; // even if this fails to set, there's a Variant so "variant" shouldn't be used.
+		}
+		return false;
 	}
 
 	@Inject(method = "get", at = @At("HEAD"), cancellable = true)
@@ -136,7 +155,7 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 	}
 
 	@Inject(method = "getBreedOffspring", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/axolotl/Axolotl;setPersistenceRequired()V"), cancellable = true)
-	void mavapi$applyImplicitComponent(ServerLevel level, AgeableMob otherParent, CallbackInfoReturnable<AgeableMob> cir, @Local Axolotl axolotl) {
+	void mavapi$getBreedOffspring(ServerLevel level, AgeableMob otherParent, CallbackInfoReturnable<AgeableMob> cir, @Local Axolotl axolotl) {
 		Holder<AxolotlVariant> variant;
 		if (useRareVariant(this.random)) {
 			variant = AxolotlVariants.getRareSpawnVariant(registryAccess(), random);
