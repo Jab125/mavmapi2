@@ -30,7 +30,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -41,17 +43,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @SuppressWarnings("NullableProblems")
 @Mixin(Axolotl.class)
 public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtension {
-	@SuppressWarnings("WrongEntityDataParameterClass")
 	@Unique
-	private static final EntityDataAccessor<Holder<AxolotlVariant>> DATA_VARIANT_ID = SynchedEntityData.defineId(Axolotl.class, ModEntityDataSerializers.AXOLOTL_VARIANT);
+	private static @Final @Mutable EntityDataAccessor<Holder<AxolotlVariant>> DATA_VARIANT_ID;
 
 	protected AxolotlMixin(EntityType<? extends LivingEntity> entityType, Level level) {
 		super(entityType, level);
 	}
 
+	@SuppressWarnings("WrongEntityDataParameterClass")
 	@WrapOperation(method = "<clinit>", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/syncher/SynchedEntityData;defineId(Ljava/lang/Class;Lnet/minecraft/network/syncher/EntityDataSerializer;)Lnet/minecraft/network/syncher/EntityDataAccessor;"))
 	private static <T> EntityDataAccessor<T> mavm$clinit(Class<? extends SyncedDataHolder> clazz, EntityDataSerializer<T> serializer, Operation<EntityDataAccessor<T>> original) {
-		if (serializer == EntityDataSerializers.INT) return null;
+		if (serializer == EntityDataSerializers.INT) {
+			DATA_VARIANT_ID = SynchedEntityData.defineId(Axolotl.class, ModEntityDataSerializers.AXOLOTL_VARIANT);
+			return null;
+		}
 		return original.call(clazz, serializer);
 	}
 
@@ -83,14 +88,6 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 	@Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
 	void mavapi$readAdditionalSaveData(ValueInput input, CallbackInfo ci) {
 		VariantUtils.readVariant(input, MavApiRegistries.AXOLOTL_VARIANT).ifPresent(this::setVariant);
-		// L1
-		//    LINENUMBER 214 L1
-		//    ALOAD 1
-		//    LDC "Variant"
-		//    GETSTATIC net/minecraft/world/entity/animal/axolotl/Axolotl$Variant.LEGACY_CODEC : Lcom/mojang/serialization/Codec;
-		//    ALOAD 0
-		//    INVOKEVIRTUAL net/minecraft/world/entity/animal/axolotl/Axolotl.getVariant ()Lnet/minecraft/world/entity/animal/axolotl/Axolotl$Variant;
-		//    INVOKEINTERFACE net/minecraft/world/level/storage/ValueOutput.store (Ljava/lang/String;Lcom/mojang/serialization/Codec;Ljava/lang/Object;)V (itf)
 	}
 
 	@Inject(method = "get", at = @At("HEAD"), cancellable = true)
