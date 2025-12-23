@@ -9,7 +9,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -18,7 +17,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -71,7 +69,7 @@ public record AxolotlVariant(ClientAsset.ResourceTexture assetInfo, SpawnPriorit
 		}
 
 		public VariantTooltipProvider(@Nullable HolderLookup.Provider access, Axolotl.Variant legacyVariant) {
-			this.variantHolder = access == null ? null : access.get(AxolotlHelpers.fromVanilla(legacyVariant)).orElse(null);
+			this.variantHolder = access == null ? null : access.get(AxolotlVariants.fromVanilla(legacyVariant)).orElse(null);
 			this.legacy = true;
 		}
 

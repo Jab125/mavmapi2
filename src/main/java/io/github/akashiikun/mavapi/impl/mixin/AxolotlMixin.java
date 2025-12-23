@@ -4,7 +4,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.serialization.Codec;
-import io.github.akashiikun.mavapi.api.v2.AxolotlHelpers;
 import io.github.akashiikun.mavapi.api.v2.AxolotlVariant;
 import io.github.akashiikun.mavapi.api.v2.AxolotlVariants;
 import io.github.akashiikun.mavapi.api.v2.MavApiDataComponents;
@@ -90,7 +89,7 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 
 	@Inject(method = "setVariant", at = @At("HEAD"), cancellable = true)
 	void mavapi$setVariant(Axolotl.Variant variant, CallbackInfo ci) {
-		registryAccess().get(AxolotlHelpers.fromVanilla(variant)).ifPresent(this::setVariant);
+		registryAccess().get(AxolotlVariants.fromVanilla(variant)).ifPresent(this::setVariant);
 		ci.cancel();
 	}
 
@@ -121,7 +120,7 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 	private boolean readLegacyVariant(ValueInput input) {
 		Axolotl.Variant legacyVariant = input.read("Variant", Axolotl.Variant.LEGACY_CODEC).orElse(null);
 		if (legacyVariant != null) {
-			Optional<Holder.Reference<AxolotlVariant>> axolotlVariantReference = registryAccess().get(AxolotlHelpers.fromVanilla(legacyVariant));
+			Optional<Holder.Reference<AxolotlVariant>> axolotlVariantReference = registryAccess().get(AxolotlVariants.fromVanilla(legacyVariant));
 			axolotlVariantReference.ifPresent(this::setVariant);
 			return true; // even if this fails to set, there's a Variant so "variant" shouldn't be used.
 		}

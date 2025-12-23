@@ -54,4 +54,14 @@ public class AxolotlVariants {
 		}
 		return Util.getRandom(array, random);
 	}
+
+	public static ResourceKey<AxolotlVariant> fromVanilla(Axolotl.Variant variant) {
+		return switch (variant) {
+			case LUCY -> LUCY;
+			case GOLD -> GOLD;
+			case WILD -> WILD;
+			case CYAN -> CYAN;
+			case BLUE -> BLUE;
+		};
+	}
 }
