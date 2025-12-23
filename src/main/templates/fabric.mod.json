@@ -8,7 +8,6 @@
     "${mod_author}"
   ],
   "contact": {
-    "homepage": "https://discord.gg/NvwhXq493P",
     "issues": "https://github.com/${github}/issues",
     "sources": "https://github.com/${github}"
   },
