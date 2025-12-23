@@ -9,7 +9,6 @@ public class AxolotlItemVariantComponentFixHelper {
 		Optional<Number> optional = entityData.get("Variant").asNumber().result();
 		if (optional.isEmpty()) {
 			// It's not a number
-
 			Optional<String> optional1 = entityData.get("Variant").asString().result();
 			if (optional1.isEmpty()) return data;
 			String s = AxolotlMigrationsImpl.migrateName(optional1.get());
