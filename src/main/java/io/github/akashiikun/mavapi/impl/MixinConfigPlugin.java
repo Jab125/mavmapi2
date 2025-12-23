@@ -53,7 +53,7 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
 	// TODO mappings
 	@Override
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-		if (mixinClassName.contains("AxolotlMixin")) {
+		if (mixinClassName.contains("AxolotlMixin") && !mixinClassName.contains("$")) {
 			{
 				MethodNode readAdditionalSaveData = targetClass.methods.stream().filter(a -> a.name.equals("readAdditionalSaveData")).findFirst().orElseThrow();
 				InsnList oldList = readAdditionalSaveData.instructions;

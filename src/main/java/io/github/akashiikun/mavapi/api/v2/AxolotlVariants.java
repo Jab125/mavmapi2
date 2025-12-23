@@ -5,16 +5,23 @@
 
 package io.github.akashiikun.mavapi.api.v2;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.variant.BiomeCheck;
 import net.minecraft.world.entity.variant.ModelAndTexture;
 import net.minecraft.world.entity.variant.SpawnPrioritySelectors;
 import net.minecraft.world.level.biome.Biome;
+
+import java.util.Arrays;
 
 @SuppressWarnings("NullableProblems")
 public class AxolotlVariants {
@@ -45,4 +52,18 @@ public class AxolotlVariants {
         Identifier identifier = Identifier.withDefaultNamespace("entity/axolotl/axolotl_" /*blame mojang*/ + string);
         bootstrapContext.register(resourceKey, new AxolotlVariant(new ModelAndTexture<>(modelType, identifier), spawnPrioritySelectors));
     }
+
+	public static Holder<AxolotlVariant> getCommonSpawnVariant(RegistryAccess registryAccess, RandomSource random) {
+		return getSpawnVariant(registryAccess, random, true);
+	}
+
+	public static Holder<AxolotlVariant> getRareSpawnVariant(RegistryAccess registryAccess, RandomSource random) {
+		return getSpawnVariant(registryAccess, random, false);
+	}
+
+	private static Holder<AxolotlVariant> getSpawnVariant(RegistryAccess registryAccess, RandomSource random, boolean common) {
+		//noinspection unchecked
+		Holder<AxolotlVariant>[] array = registryAccess.lookupOrThrow(MavApiRegistries.AXOLOTL_VARIANT).entrySet().stream().filter(variant -> common != variant.getKey().equals(BLUE)).map(a -> registryAccess.getOrThrow(a.getKey())).toArray(Holder.Reference[]::new);
+		return Util.getRandom(array, random);
+	}
 }

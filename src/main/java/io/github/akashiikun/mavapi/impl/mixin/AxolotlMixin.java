@@ -8,7 +8,8 @@ import io.github.akashiikun.mavapi.api.v2.AxolotlVariant;
 import io.github.akashiikun.mavapi.api.v2.AxolotlVariants;
 import io.github.akashiikun.mavapi.api.v2.MavApiDataComponents;
 import io.github.akashiikun.mavapi.api.v2.MavApiRegistries;
-import io.github.akashiikun.mavapi.impl.extension.client.AxolotlExtension;
+import io.github.akashiikun.mavapi.impl.extension.AxolotlExtension;
+import io.github.akashiikun.mavapi.impl.extension.AxolotlGroupDataExtension;
 import io.github.akashiikun.mavapi.impl.init.ModEntityDataSerializers;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentGetter;
@@ -27,7 +28,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
-import net.minecraft.world.entity.animal.cow.Cow;
 import net.minecraft.world.entity.variant.SpawnContext;
 import net.minecraft.world.entity.variant.VariantUtils;
 import net.minecraft.world.item.ItemStack;
@@ -38,6 +38,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -91,9 +92,22 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 		ci.cancel();
 	}
 
-	@Inject(method = "finalizeSpawn", at = @At("HEAD"))
-	void mavapi$finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnReason, SpawnGroupData spawnGroupData, CallbackInfoReturnable<SpawnGroupData> cir) {
-		VariantUtils.selectVariantToSpawn(SpawnContext.create(level, this.blockPosition()), MavApiRegistries.AXOLOTL_VARIANT).ifPresent(this::setVariant);
+	@Redirect(method = "finalizeSpawn", at = @At(value = "NEW", target = "net/minecraft/world/entity/animal/axolotl/Axolotl$AxolotlGroupData"))
+	Axolotl.AxolotlGroupData mavapi$finalizeSpawn(Axolotl.Variant[] types) {
+		Axolotl.AxolotlGroupData axolotlGroupData = new Axolotl.AxolotlGroupData(null);
+		//noinspection unchecked
+		((AxolotlGroupDataExtension) axolotlGroupData).setVariants(new Holder[]{AxolotlVariants.getCommonSpawnVariant(registryAccess(), random), AxolotlVariants.getCommonSpawnVariant(registryAccess(), random)});
+		return axolotlGroupData;
+	}
+
+	@Redirect(method = "finalizeSpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/axolotl/Axolotl$AxolotlGroupData;getVariant(Lnet/minecraft/util/RandomSource;)Lnet/minecraft/world/entity/animal/axolotl/Axolotl$Variant;"))
+	Axolotl.Variant mavapi$finalizeSpawn(Axolotl.AxolotlGroupData instance, RandomSource random) {
+		return null;
+	}
+
+	@Redirect(method = "finalizeSpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/axolotl/Axolotl;setVariant(Lnet/minecraft/world/entity/animal/axolotl/Axolotl$Variant;)V"))
+	void mavapi$finalizeSpawn(Axolotl instance, Axolotl.Variant variant, @Local(argsOnly = true) SpawnGroupData data) {
+		((AxolotlExtension) instance).setVariant(((AxolotlGroupDataExtension) data).getVariant(random));
 	}
 
 	@Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
@@ -147,5 +161,38 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 	@Override
 	public Holder<AxolotlVariant> getVariant() {
 		return this.entityData.get(DATA_VARIANT_ID);
+	}
+
+	@Mixin(Axolotl.AxolotlGroupData.class)
+	public static class AxolotlGroupDataMixin implements AxolotlGroupDataExtension {
+		@Unique
+		public @Mutable @Final Holder<AxolotlVariant>[] variants; // TODO holder?
+		@Inject(method = "<init>", at = @At("CTOR_HEAD"))
+		void init(Axolotl.Variant[] types, CallbackInfo ci) {
+			if (types != null) throw new AssertionError("Use the API!");
+		}
+
+		@Override
+		public void setVariants(Holder<AxolotlVariant>[] variants) {
+			this.variants = variants;
+		}
+
+		@Override
+		public Holder<AxolotlVariant> getVariant(RandomSource random) {
+			return this.variants[random.nextInt(this.variants.length)];
+		}
+	}
+
+	// Needed since they have clashing names
+	@Mixin(Axolotl.AxolotlGroupData.class)
+	public static class AxolotlGroupData2Mixin {
+		/**
+		 * @author Jab125
+		 * @reason Make our intentions clear
+		 */
+		@Overwrite
+		public Axolotl.Variant getVariant(RandomSource random) {
+			throw new AssertionError("Use the API!");
+		}
 	}
 }

@@ -1,4 +1,4 @@
-package io.github.akashiikun.mavapi.impl.extension.client;
+package io.github.akashiikun.mavapi.impl.extension;
 
 import io.github.akashiikun.mavapi.api.v2.AxolotlVariant;
 import net.minecraft.core.Holder;

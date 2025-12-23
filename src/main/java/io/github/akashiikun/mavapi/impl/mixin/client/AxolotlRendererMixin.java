@@ -1,6 +1,6 @@
 package io.github.akashiikun.mavapi.impl.mixin.client;
 
-import io.github.akashiikun.mavapi.impl.extension.client.AxolotlExtension;
+import io.github.akashiikun.mavapi.impl.extension.AxolotlExtension;
 import io.github.akashiikun.mavapi.impl.extension.client.AxolotlRenderStateExtension;
 import net.minecraft.client.renderer.entity.AxolotlRenderer;
 import net.minecraft.client.renderer.entity.state.AxolotlRenderState;

@@ -9,6 +9,8 @@
   },
   "mixins": [
     "AxolotlMixin",
+    "AxolotlMixin$AxolotlGroupData2Mixin",
+    "AxolotlMixin$AxolotlGroupDataMixin",
     "client.AxolotlRenderStateMixin"
   ],
   "client": [
