@@ -64,10 +64,10 @@ modstitch {
         } else {
             "$versionWithoutMC+${stonecutter.current.project}"
         }
-        modGroup = "dev.isxander"
+        modGroup = "io.github.akashiikun"
         prop("modDescription") { modDescription = it }
         modLicense = "LGPL-3.0-or-later"
-        modAuthor = "isXander"
+        modAuthor = "AkashiiKun"
 
         prop("githubProject") { replacementProperties.put("github", it) }
         prop("meta.mcDep") { replacementProperties.put("mc", it) }
@@ -229,7 +229,7 @@ val releaseModVersion by tasks.registering {
     dependsOn("publishMods")
 
     if (!project.publishMods.dryRun.get()) {
-        dependsOn("publishModPublicationToXanderReleasesRepository")
+        //dependsOn("publishModPublicationToFILLTHISINReleasesRepository")
     }
 }
 createActiveTask(releaseModVersion)
