@@ -12,8 +12,6 @@ import java.lang.invoke.MethodHandles;
 public class MavApiInit implements ModInitializer {
 	@Override
 	public void onInitialize() {
-		System.err.println("init");
-		//EntityDataSerializers
 		try {
 			MethodHandles.publicLookup().ensureInitialized(ModEntityDataSerializers.class);
 			MethodHandles.publicLookup().ensureInitialized(MavApiDataComponents.class);

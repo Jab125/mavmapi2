@@ -1,5 +1,6 @@
 package io.github.akashiikun.mavapi.impl.mixin.client;
 
+import io.github.akashiikun.mavapi.api.v2.AxolotlHelpers;
 import io.github.akashiikun.mavapi.impl.extension.AxolotlExtension;
 import io.github.akashiikun.mavapi.impl.extension.client.AxolotlRenderStateExtension;
 import net.minecraft.client.renderer.entity.AxolotlRenderer;
@@ -26,6 +27,6 @@ public class AxolotlRendererMixin {
 
 	@Inject(method = "extractRenderState(Lnet/minecraft/world/entity/animal/axolotl/Axolotl;Lnet/minecraft/client/renderer/entity/state/AxolotlRenderState;F)V", at = @At("RETURN"))
 	void extract(Axolotl axolotl, AxolotlRenderState axolotlRenderState, float f, CallbackInfo ci) {
-		((AxolotlRenderStateExtension) axolotlRenderState).setVariant(((AxolotlExtension) axolotl).getVariant().value());
+		((AxolotlRenderStateExtension) axolotlRenderState).setVariant(AxolotlHelpers.getVariant(axolotl).value());
 	}
 }

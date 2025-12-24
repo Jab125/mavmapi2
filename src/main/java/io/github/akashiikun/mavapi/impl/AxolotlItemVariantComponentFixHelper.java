@@ -12,7 +12,7 @@ public class AxolotlItemVariantComponentFixHelper {
 			Optional<String> optional1 = entityData.get("Variant").asString().result();
 			if (optional1.isEmpty()) return data;
 			String s = AxolotlMigrationsImpl.migrateName(optional1.get());
-			return data.update("minecraft:bucket_entity_data", p_397463_ -> p_397463_.remove("Variant"))
+			return data.update("minecraft:bucket_entity_data", dynamic -> dynamic.remove("Variant"))
 					.set("mavapi:axolotl/variant", data.createString(s));
 		} else {
 			// Vanilla numerical ids
@@ -23,7 +23,7 @@ public class AxolotlItemVariantComponentFixHelper {
 				case 4 -> "minecraft:blue";
 				default -> "minecraft:lucy";
 			}); // you can do this but please don't
-			return data.update("minecraft:bucket_entity_data", p_397463_ -> p_397463_.remove("Variant"))
+			return data.update("minecraft:bucket_entity_data", dynamic -> dynamic.remove("Variant"))
 					.set("mavapi:axolotl/variant", data.createString(s));
 		}
 	}

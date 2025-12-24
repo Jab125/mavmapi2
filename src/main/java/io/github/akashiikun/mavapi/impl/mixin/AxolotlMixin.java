@@ -4,8 +4,10 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.serialization.Codec;
+import io.github.akashiikun.mavapi.api.v2.AxolotlHelpers;
 import io.github.akashiikun.mavapi.api.v2.AxolotlVariant;
 import io.github.akashiikun.mavapi.api.v2.AxolotlVariants;
+import io.github.akashiikun.mavapi.api.v2.MavApiAxolotlGroupData;
 import io.github.akashiikun.mavapi.api.v2.MavApiDataComponents;
 import io.github.akashiikun.mavapi.api.v2.MavApiRegistries;
 import io.github.akashiikun.mavapi.impl.extension.AxolotlExtension;
@@ -95,10 +97,7 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 
 	@Redirect(method = "finalizeSpawn", at = @At(value = "NEW", target = "net/minecraft/world/entity/animal/axolotl/Axolotl$AxolotlGroupData"))
 	Axolotl.AxolotlGroupData mavapi$finalizeSpawn(Axolotl.Variant[] types) {
-		Axolotl.AxolotlGroupData axolotlGroupData = new Axolotl.AxolotlGroupData(null);
-		//noinspection unchecked
-		((AxolotlGroupDataExtension) axolotlGroupData).setVariants(new Holder[]{AxolotlVariants.getCommonSpawnVariant(registryAccess(), random), AxolotlVariants.getCommonSpawnVariant(registryAccess(), random)});
-		return axolotlGroupData;
+		return MavApiAxolotlGroupData.create(AxolotlVariants.getCommonSpawnVariant(registryAccess(), random), AxolotlVariants.getCommonSpawnVariant(registryAccess(), random));
 	}
 
 	@Redirect(method = "finalizeSpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/axolotl/Axolotl$AxolotlGroupData;getVariant(Lnet/minecraft/util/RandomSource;)Lnet/minecraft/world/entity/animal/axolotl/Axolotl$Variant;"))
@@ -108,7 +107,7 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 
 	@Redirect(method = "finalizeSpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/axolotl/Axolotl;setVariant(Lnet/minecraft/world/entity/animal/axolotl/Axolotl$Variant;)V"))
 	void mavapi$finalizeSpawn(Axolotl instance, Axolotl.Variant variant, @Local(argsOnly = true) SpawnGroupData data) {
-		((AxolotlExtension) instance).setVariant(((AxolotlGroupDataExtension) data).getVariant(random));
+		AxolotlHelpers.setVariant(instance, MavApiAxolotlGroupData.getVariant((Axolotl.AxolotlGroupData) data, random));
 	}
 
 	@Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
@@ -159,9 +158,9 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 		if (useRareVariant(this.random)) {
 			variant = AxolotlVariants.getRareSpawnVariant(registryAccess(), random);
 		} else {
-			variant = this.random.nextBoolean() ? this.getVariant() : ((AxolotlExtension) otherParent).getVariant();
+			variant = this.random.nextBoolean() ? this.getVariant() : AxolotlHelpers.getVariant((Axolotl) otherParent);
 		}
-		((AxolotlExtension) axolotl).setVariant(variant);
+		AxolotlHelpers.setVariant(axolotl, variant);
 	}
 
 	@Redirect(method = "saveToBucketTag", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;copyFrom(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/core/component/DataComponentGetter;)V"))
