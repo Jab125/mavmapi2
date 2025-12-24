@@ -2,6 +2,7 @@ package io.github.akashiikun.mavapi.impl.mixin;
 
 import io.github.akashiikun.mavapi.api.v2.AxolotlVariant;
 import io.github.akashiikun.mavapi.api.v2.MavApiDataComponents;
+import io.github.akashiikun.mavapi.impl.VariantTooltipProvider;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
@@ -43,7 +44,7 @@ public abstract class ItemStackMixin implements DataComponentHolder {
 	) {
 		Holder<AxolotlVariant> tooltipProvider = this.get(component);
 		if (tooltipProvider != null && tooltipDisplay.shows(component)) {
-			new AxolotlVariant.VariantTooltipProvider(tooltipProvider).addToTooltip(context, tooltipAdder, tooltipFlag, this.components);
+			new VariantTooltipProvider(tooltipProvider).addToTooltip(context, tooltipAdder, tooltipFlag, this.components);
 		}
 	}
 
@@ -53,7 +54,7 @@ public abstract class ItemStackMixin implements DataComponentHolder {
 	) {
 		Axolotl.Variant tooltipProvider = this.get(component);
 		if (tooltipProvider != null && tooltipDisplay.shows(component)) {
-			new AxolotlVariant.VariantTooltipProvider(context.registries(), tooltipProvider).addToTooltip(context, tooltipAdder, tooltipFlag, this.components);
+			new VariantTooltipProvider(context.registries(), tooltipProvider).addToTooltip(context, tooltipAdder, tooltipFlag, this.components);
 		}
 	}
 }
