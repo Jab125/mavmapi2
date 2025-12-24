@@ -17,11 +17,11 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
+
+import static io.github.akashiikun.mavapi.impl.init.ModEntityDataSerializers.AXOLOTL_VARIANT;
 *///?}
 
 import java.lang.invoke.MethodHandles;
-
-import static io.github.akashiikun.mavapi.impl.init.ModEntityDataSerializers.AXOLOTL_VARIANT;
 
 //? if neoforge {
 /*@Mod(MavApiInit.MOD_ID)
