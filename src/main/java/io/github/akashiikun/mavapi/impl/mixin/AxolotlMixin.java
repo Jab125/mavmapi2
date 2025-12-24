@@ -54,9 +54,6 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 	@Shadow
 	private static native boolean useRareVariant(RandomSource random);
 
-	@Shadow
-	protected abstract void setVariant(Axolotl.Variant variant);
-
 	@Unique
 	private static @Final @Mutable EntityDataAccessor<Holder<AxolotlVariant>> DATA_VARIANT_ID;
 
@@ -64,6 +61,7 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 		super(entityType, level);
 	}
 
+	// Since initialization order matters, we make sure we always get the same numerical id by replacing Axolotl.DATA_VARIANT with our DATA_VARIANT_ID
 	@SuppressWarnings("WrongEntityDataParameterClass")
 	@WrapOperation(method = "<clinit>", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/syncher/SynchedEntityData;defineId(Ljava/lang/Class;Lnet/minecraft/network/syncher/EntityDataSerializer;)Lnet/minecraft/network/syncher/EntityDataAccessor;"))
 	private static <T> EntityDataAccessor<T> mavm$clinit(Class<? extends SyncedDataHolder> clazz, EntityDataSerializer<T> serializer, Operation<EntityDataAccessor<T>> original) {
@@ -74,6 +72,7 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 		return original.call(clazz, serializer);
 	}
 
+	// replace DATA_VARIANT with DATA_VARIANT_ID
 	@Redirect(method = "defineSynchedData", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/syncher/SynchedEntityData$Builder;define(Lnet/minecraft/network/syncher/EntityDataAccessor;Ljava/lang/Object;)Lnet/minecraft/network/syncher/SynchedEntityData$Builder;", ordinal = 0))
 	<T> SynchedEntityData.Builder mavapi$defineSynchedData(SynchedEntityData.Builder builder, EntityDataAccessor<T> accessor, T value) {
 		return builder.define(DATA_VARIANT_ID, VariantUtils.getDefaultOrAny(this.registryAccess(), AxolotlVariants.LUCY));
@@ -84,46 +83,55 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 		VariantUtils.writeVariant(output, this.getVariant());
 	}
 
+	// make vanilla getVariant always return the default.
 	@Inject(method = "getVariant", at = @At("HEAD"), cancellable = true)
 	void mavapi$getVariant(CallbackInfoReturnable<Axolotl.Variant> cir) {
 		cir.setReturnValue(Axolotl.Variant.DEFAULT);
 	}
 
+	// make vanilla setVariant set the mavapi variant if possible. vanilla setVariant should only be called in mods without mavapi compatibility.
 	@Inject(method = "setVariant", at = @At("HEAD"), cancellable = true)
 	void mavapi$setVariant(Axolotl.Variant variant, CallbackInfo ci) {
 		registryAccess().get(AxolotlVariants.fromVanilla(variant)).ifPresent(this::setVariant);
 		ci.cancel();
 	}
 
+	// Use mavapi's AxolotlVariant instead
 	@Redirect(method = "finalizeSpawn", at = @At(value = "NEW", target = "net/minecraft/world/entity/animal/axolotl/Axolotl$AxolotlGroupData"))
 	Axolotl.AxolotlGroupData mavapi$finalizeSpawn(Axolotl.Variant[] types) {
 		return MavApiAxolotlGroupData.create(AxolotlVariants.getCommonSpawnVariant(registryAccess(), random), AxolotlVariants.getCommonSpawnVariant(registryAccess(), random));
 	}
 
+	// done so a call isn't wasted, also AxolotlGroupData#getVariant() throws an exception when used.
 	@Redirect(method = "finalizeSpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/axolotl/Axolotl$AxolotlGroupData;getVariant(Lnet/minecraft/util/RandomSource;)Lnet/minecraft/world/entity/animal/axolotl/Axolotl$Variant;"))
 	Axolotl.Variant mavapi$finalizeSpawn(Axolotl.AxolotlGroupData instance, RandomSource random) {
 		return null;
 	}
 
+	// Use mavapi's AxolotlVariant instead
 	@Redirect(method = "finalizeSpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/axolotl/Axolotl;setVariant(Lnet/minecraft/world/entity/animal/axolotl/Axolotl$Variant;)V"))
 	void mavapi$finalizeSpawn(Axolotl instance, Axolotl.Variant variant, @Local(argsOnly = true) SpawnGroupData data) {
 		AxolotlHelpers.setVariant(instance, MavApiAxolotlGroupData.getVariant((Axolotl.AxolotlGroupData) data, random));
 	}
 
+	// Read mavapi's variant, not vanilla's "Variant"
 	@Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
 	void mavapi$readAdditionalSaveData(ValueInput input, CallbackInfo ci) {
 		if (!readLegacyVariant(input)) VariantUtils.readVariant(input, MavApiRegistries.AXOLOTL_VARIANT).ifPresent(this::setVariant);
 	}
 
+	// Read vanilla's "Variant", as well as mavapi v1's "Variant"
 	@Unique
 	private boolean readLegacyVariant(ValueInput input) {
 		Axolotl.Variant legacyVariant = input.read("Variant", Axolotl.Variant.LEGACY_CODEC).orElse(null);
+		// Handle vanilla's variant
 		if (legacyVariant != null) {
 			Optional<Holder.Reference<AxolotlVariant>> axolotlVariantReference = registryAccess().get(AxolotlVariants.fromVanilla(legacyVariant));
 			axolotlVariantReference.ifPresent(this::setVariant);
 			return true; // even if this fails to set, there's a Variant so "variant" shouldn't be used.
 		}
 		Identifier mavApiV1Variant = input.read("Variant", Identifier.CODEC).orElse(null);
+		// Handle mavapi v1's variant
 		if (mavApiV1Variant != null) {
 			Optional<Holder.Reference<AxolotlVariant>> axolotlVariantReference = registryAccess().lookupOrThrow(MavApiRegistries.AXOLOTL_VARIANT).get(mavApiV1Variant);
 			axolotlVariantReference.ifPresent(this::setVariant);
@@ -152,6 +160,7 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 		}
 	}
 
+	// Basically identical to vanilla's except that we are using mavapi's AxolotlVariant
 	@Inject(method = "getBreedOffspring", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/axolotl/Axolotl;setPersistenceRequired()V"), cancellable = true)
 	void mavapi$getBreedOffspring(ServerLevel level, AgeableMob otherParent, CallbackInfoReturnable<AgeableMob> cir, @Local Axolotl axolotl) {
 		Holder<AxolotlVariant> variant;
@@ -163,6 +172,7 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 		AxolotlHelpers.setVariant(axolotl, variant);
 	}
 
+	// Use mavapi's component instead of vanilla's.
 	@Redirect(method = "saveToBucketTag", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;copyFrom(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/core/component/DataComponentGetter;)V"))
 	<T> void mavapi$saveToBucketTag(ItemStack instance, DataComponentType<T> componentType, DataComponentGetter componentGetter) {
 		instance.copyFrom(MavApiDataComponents.AXOLOTL_VARIANT, componentGetter);
@@ -181,10 +191,10 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 	@Mixin(Axolotl.AxolotlGroupData.class)
 	public static class AxolotlGroupDataMixin implements AxolotlGroupDataExtension {
 		@Unique
-		public @Mutable @Final Holder<AxolotlVariant>[] variants; // TODO holder?
+		private @Mutable @Final Holder<AxolotlVariant>[] variants; // TODO holder?
 		@Inject(method = "<init>", at = @At("CTOR_HEAD"))
 		void init(Axolotl.Variant[] types, CallbackInfo ci) {
-			if (types != null) throw new AssertionError("Use the API!");
+			if (types != null) throw new AssertionError("Use MavApiAxolotlGroupData#create instead!");
 		}
 
 		@Override
@@ -207,7 +217,7 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 		 */
 		@Overwrite
 		public Axolotl.Variant getVariant(RandomSource random) {
-			throw new AssertionError("Use the API!");
+			throw new AssertionError("Use MavApiAxolotlGroupData#getVariant instead!");
 		}
 	}
 }
