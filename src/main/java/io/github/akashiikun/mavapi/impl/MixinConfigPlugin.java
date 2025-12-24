@@ -117,7 +117,6 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
 		return nameMap.get("RandomSource");
 	}
 
-	// TODO mappings
 	@Override
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
 		if (mixinClassName.contains("AxolotlMixin") && !mixinClassName.contains("$")) {
@@ -144,11 +143,6 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
 					if (instruction instanceof TypeInsnNode insnNode && insnNode.getOpcode() == Opcodes.CHECKCAST && insnNode.desc.equals(Axolotl$Variant())) {
 						getTheNextOne = true;
 					}
-//					if (instruction instanceof MethodInsnNode insnNode && insnNode.getOpcode() == Opcodes.INVOKEVIRTUAL && ((MethodInsnNode) instruction).name.equals("setVariant")) {
-//						System.out.println(insnNode.name + " " + insnNode.owner + " " + insnNode.desc);
-//						to = insnNode;
-//						break;
-//					}
 				}
 				InsnList list = new InsnList();
 
@@ -220,21 +214,6 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
 					printer.print(new PrintWriter(System.out));
 				}
 			}
-
-//			while (true) {
-//				AbstractInsnNode insnNode = readAdditionalSaveData.instructions.get(i);
-//				System.out.println("removed " + insnNode);
-//				readAdditionalSaveData.instructions.remove(insnNode);
-//				if (insnNode == to) break;
-//			}
-//
-//			for (AbstractInsnNode instruction : readAdditionalSaveData.instructions) {
-//				System.out.println(instruction);
-//			}
-//			readAdditionalSaveData.localVariables.removeIf(lv -> lv.start == from || lv.end == from);
-//			readAdditionalSaveData.instructions.resetLabels();
-//			readAdditionalSaveData.maxStack = -1;
-//			readAdditionalSaveData.maxLocals = -1;
 		}
 	}
 
