@@ -5,6 +5,7 @@
 
 package io.github.akashiikun.mavapi.api.v2;
 
+import io.github.akashiikun.mavapi.impl.extension.AxolotlExtension;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -63,5 +64,13 @@ public class AxolotlVariants {
 			case CYAN -> CYAN;
 			case BLUE -> BLUE;
 		};
+	}
+
+	public static void setVariant(Axolotl axolotl, Holder<AxolotlVariant> variantHolder) {
+		((AxolotlExtension) axolotl).setVariant(variantHolder);
+	}
+
+	public static Holder<AxolotlVariant> getVariant(Axolotl axolotl) {
+		return ((AxolotlExtension) axolotl).getVariant();
 	}
 }

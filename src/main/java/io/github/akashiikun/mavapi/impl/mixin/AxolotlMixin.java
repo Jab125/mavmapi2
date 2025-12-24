@@ -4,7 +4,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.serialization.Codec;
-import io.github.akashiikun.mavapi.api.v2.AxolotlHelpers;
 import io.github.akashiikun.mavapi.api.v2.AxolotlVariant;
 import io.github.akashiikun.mavapi.api.v2.AxolotlVariants;
 import io.github.akashiikun.mavapi.api.v2.MavApiAxolotlGroupData;
@@ -111,7 +110,7 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 	// Use mavapi's AxolotlVariant instead
 	@Redirect(method = "finalizeSpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/axolotl/Axolotl;setVariant(Lnet/minecraft/world/entity/animal/axolotl/Axolotl$Variant;)V"))
 	void mavapi$finalizeSpawn(Axolotl instance, Axolotl.Variant variant, @Local(argsOnly = true) SpawnGroupData data) {
-		AxolotlHelpers.setVariant(instance, MavApiAxolotlGroupData.getVariant((Axolotl.AxolotlGroupData) data, random));
+		AxolotlVariants.setVariant(instance, MavApiAxolotlGroupData.getVariant((Axolotl.AxolotlGroupData) data, random));
 	}
 
 	// Read mavapi's variant, not vanilla's "Variant"
@@ -167,9 +166,9 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 		if (useRareVariant(this.random)) {
 			variant = AxolotlVariants.getRareSpawnVariant(registryAccess(), random);
 		} else {
-			variant = this.random.nextBoolean() ? this.getVariant() : AxolotlHelpers.getVariant((Axolotl) otherParent);
+			variant = this.random.nextBoolean() ? this.getVariant() : AxolotlVariants.getVariant((Axolotl) otherParent);
 		}
-		AxolotlHelpers.setVariant(axolotl, variant);
+		AxolotlVariants.setVariant(axolotl, variant);
 	}
 
 	// Use mavapi's component instead of vanilla's.
