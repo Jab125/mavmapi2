@@ -23,7 +23,7 @@
   },
   "entrypoints": {
     "main": [
-      "io.github.akashiikun.mavapi.impl.MavApiInit"
+      "io.github.akashiikun.mavapi.impl.MavApiInit::onInitialize"
     ]
   },
   "custom": {

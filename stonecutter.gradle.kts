@@ -31,7 +31,6 @@ stonecutter {
     parameters {
         fun String.propDefined() = project(node.metadata.project).findProperty(this)?.toString()?.isNotBlank() ?: false
         constants += listOf(
-            "controlify" to "deps.controlify".propDefined(),
             "mod-menu" to "deps.modMenu".propDefined(),
         )
     }

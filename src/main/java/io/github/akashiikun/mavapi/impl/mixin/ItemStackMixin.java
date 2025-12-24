@@ -34,12 +34,12 @@ public abstract class ItemStackMixin implements DataComponentHolder {
 
 	@Inject(method = "addDetailsToTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;appendHoverText(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/Item$TooltipContext;Lnet/minecraft/world/item/component/TooltipDisplay;Ljava/util/function/Consumer;Lnet/minecraft/world/item/TooltipFlag;)V", shift = At.Shift.AFTER))
 	void mavapi$addDetailsToTooltip(Item.TooltipContext context, TooltipDisplay tooltipDisplay, @Nullable Player player, TooltipFlag tooltipFlag, Consumer<Component> tooltipAdder, CallbackInfo ci) {
-		this.mavm$addToTooltip(MavApiDataComponents.AXOLOTL_VARIANT, context, tooltipDisplay, tooltipAdder, tooltipFlag);
-		this.mavm$addToTooltip2(DataComponents.AXOLOTL_VARIANT, context, tooltipDisplay, tooltipAdder, tooltipFlag);
+		this.mavapi$addToTooltip(MavApiDataComponents.AXOLOTL_VARIANT, context, tooltipDisplay, tooltipAdder, tooltipFlag);
+		this.mavapi$addToTooltip2(DataComponents.AXOLOTL_VARIANT, context, tooltipDisplay, tooltipAdder, tooltipFlag);
 	}
 
 	@Unique
-	private void mavm$addToTooltip(
+	private void mavapi$addToTooltip(
 			DataComponentType<Holder<AxolotlVariant>> component, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag tooltipFlag
 	) {
 		Holder<AxolotlVariant> tooltipProvider = this.get(component);
@@ -49,7 +49,7 @@ public abstract class ItemStackMixin implements DataComponentHolder {
 	}
 
 	@Unique
-	private void mavm$addToTooltip2(
+	private void mavapi$addToTooltip2(
 			DataComponentType<Axolotl.Variant> component, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag tooltipFlag
 	) {
 		Axolotl.Variant tooltipProvider = this.get(component);

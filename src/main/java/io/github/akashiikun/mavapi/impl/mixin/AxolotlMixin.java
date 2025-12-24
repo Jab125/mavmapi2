@@ -33,6 +33,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -48,6 +49,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Optional;
 
 @SuppressWarnings("NullableProblems")
+@Debug
 @Mixin(Axolotl.class)
 public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtension {
 	@Shadow
@@ -63,7 +65,7 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 	// Since initialization order matters, we make sure we always get the same numerical id by replacing Axolotl.DATA_VARIANT with our DATA_VARIANT_ID
 	@SuppressWarnings("WrongEntityDataParameterClass")
 	@WrapOperation(method = "<clinit>", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/syncher/SynchedEntityData;defineId(Ljava/lang/Class;Lnet/minecraft/network/syncher/EntityDataSerializer;)Lnet/minecraft/network/syncher/EntityDataAccessor;"))
-	private static <T> EntityDataAccessor<T> mavm$clinit(Class<? extends SyncedDataHolder> clazz, EntityDataSerializer<T> serializer, Operation<EntityDataAccessor<T>> original) {
+	private static <T> EntityDataAccessor<T> mavapi$clinit(Class<? extends SyncedDataHolder> clazz, EntityDataSerializer<T> serializer, Operation<EntityDataAccessor<T>> original) {
 		if (serializer == EntityDataSerializers.INT) {
 			DATA_VARIANT_ID = SynchedEntityData.defineId(Axolotl.class, ModEntityDataSerializers.AXOLOTL_VARIANT);
 			return null;
@@ -192,7 +194,7 @@ public abstract class AxolotlMixin extends LivingEntity implements AxolotlExtens
 		@Unique
 		private @Mutable @Final Holder<AxolotlVariant>[] variants; // TODO holder?
 		@Inject(method = "<init>", at = @At("CTOR_HEAD"))
-		void init(Axolotl.Variant[] types, CallbackInfo ci) {
+		void mavapi$init(Axolotl.Variant[] types, CallbackInfo ci) {
 			if (types != null) throw new AssertionError("Use MavApiAxolotlGroupData#create instead!");
 		}
 

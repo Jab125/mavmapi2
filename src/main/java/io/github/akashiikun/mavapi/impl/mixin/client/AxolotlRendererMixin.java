@@ -25,7 +25,7 @@ public class AxolotlRendererMixin {
 	}
 
 	@Inject(method = "extractRenderState(Lnet/minecraft/world/entity/animal/axolotl/Axolotl;Lnet/minecraft/client/renderer/entity/state/AxolotlRenderState;F)V", at = @At("RETURN"))
-	void extract(Axolotl axolotl, AxolotlRenderState axolotlRenderState, float f, CallbackInfo ci) {
+	void mavapi$extractRenderState(Axolotl axolotl, AxolotlRenderState axolotlRenderState, float f, CallbackInfo ci) {
 		((AxolotlRenderStateExtension) axolotlRenderState).setVariant(AxolotlVariants.getVariant(axolotl).value());
 	}
 }

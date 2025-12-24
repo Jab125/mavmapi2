@@ -124,6 +124,9 @@ modstitch {
         addMixinsToModManifest = true
 
         configs.register("mavapi")
+        if (isNeoforge) {
+            configs.register("mavapi-neoforge")
+        }
     }
 
     createProxyConfigurations(testmod.get())

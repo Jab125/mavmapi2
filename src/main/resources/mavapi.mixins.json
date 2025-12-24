@@ -2,7 +2,7 @@
   "required": true,
   "package": "io.github.akashiikun.mavapi.impl.mixin",
   "plugin": "io.github.akashiikun.mavapi.impl.MixinConfigPlugin",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_21",
   "refmap": "mavapi.refmap.json",
   "injectors": {
     "defaultRequire": 1
