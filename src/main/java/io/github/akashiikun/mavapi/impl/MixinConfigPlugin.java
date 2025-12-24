@@ -119,27 +119,33 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-		if (mixinClassName.contains("AxolotlMixin") && !mixinClassName.contains("$")) {
+		if (mixinClassName.equals("io.github.akashiikun.mavapi.impl.mixin.AxolotlMixin")) {
 			{
 				MethodNode readAdditionalSaveData = targetClass.methods.stream().filter(a -> a.name.equals(readAdditionalSaveData())).findFirst().orElseThrow();
 				InsnList oldList = readAdditionalSaveData.instructions;
 
-
 				LdcInsnNode node = null;
+
+				// Look for a string called "Variant"
 				for (AbstractInsnNode instruction : readAdditionalSaveData.instructions) {
 					if (instruction instanceof LdcInsnNode insnNode && "Variant".equals(insnNode.cst)) {
 						node = insnNode;
 						break;
 					}
 				}
-				AbstractInsnNode from = IntStream.iterate(readAdditionalSaveData.instructions.indexOf(node), i -> i > 0, i -> i - 1).filter(i -> readAdditionalSaveData.instructions.get(i) instanceof LabelNode).mapToObj(i -> (LabelNode) readAdditionalSaveData.instructions.get(i)).findFirst().orElse(null);//readAdditionalSaveData.instructions.get(readAdditionalSaveData.instructions.indexOf(node) - 1);
+
+				// Go backwards until we hit a label
+				AbstractInsnNode from = IntStream.iterate(readAdditionalSaveData.instructions.indexOf(node), i -> i >= 0, i -> i - 1).filter(i -> readAdditionalSaveData.instructions.get(i) instanceof LabelNode).mapToObj(i -> (LabelNode) readAdditionalSaveData.instructions.get(i)).findFirst().orElse(null);//readAdditionalSaveData.instructions.get(readAdditionalSaveData.instructions.indexOf(node) - 1);
 				AbstractInsnNode to = null;
 				boolean getTheNextOne = false;
+
+				// Find a CHECKCAST, then get the instruction after that (which is an Axolotl#setVariant(Axolotl.Variant) call)
 				for (AbstractInsnNode instruction : readAdditionalSaveData.instructions) {
 					if (getTheNextOne) {
 						to = instruction;
 						break;
 					}
+
 					if (instruction instanceof TypeInsnNode insnNode && insnNode.getOpcode() == Opcodes.CHECKCAST && insnNode.desc.equals(Axolotl$Variant())) {
 						getTheNextOne = true;
 					}
@@ -149,6 +155,8 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
 				Textifier printer = new Textifier();
 				TraceMethodVisitor traceMV = new TraceMethodVisitor(printer);
 				boolean adding = true;
+
+				// Re-add all instructions, excluding [from, to] (inclusive)
 				for (AbstractInsnNode abstractInsnNode : oldList) {
 					if (abstractInsnNode == from) adding = false;
 					if (adding) {
@@ -170,15 +178,18 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
 
 
 				FieldInsnNode node = null;
+				// find a FieldInsnNode that is of the type net.minecraft.util.RandomSource (the instruction we want to match is "GETFIELD net/minecraft/world/entity/animal/axolotl/Axolotl.random : Lnet/minecraft/util/RandomSource;")
 				for (AbstractInsnNode instruction : getBreedOffspring.instructions) {
 					if (instruction instanceof FieldInsnNode insnNode && insnNode.desc.contains(RandomSource())) {
 						node = insnNode;
 						break;
 					}
 				}
+				// Go backwards until we hit a label
 				AbstractInsnNode from = IntStream.iterate(getBreedOffspring.instructions.indexOf(node), i -> i > 0, i -> i - 1).filter(i -> getBreedOffspring.instructions.get(i) instanceof LabelNode).mapToObj(i -> (LabelNode) getBreedOffspring.instructions.get(i)).findFirst().orElse(null);//readAdditionalSaveData.instructions.get(readAdditionalSaveData.instructions.indexOf(node) - 1);
-				AbstractInsnNode to = null;
+				AbstractInsnNode to;
 				AbstractInsnNode upTo = null;
+				// Find a call to Mob#setPersistenceRequired()
 				for (AbstractInsnNode instruction : getBreedOffspring.instructions) {
 					if (instruction instanceof MethodInsnNode insnNode && insnNode.getOpcode() == Opcodes.INVOKEVIRTUAL && ((MethodInsnNode) instruction).name.equals(setPersistenceRequired())) {
 						if (false) {
@@ -188,18 +199,14 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
 						break;
 					}
 				}
-				for (int i = getBreedOffspring.instructions.indexOf(upTo) - 1; i >= 0; i--) {
-					AbstractInsnNode abstractInsnNode = getBreedOffspring.instructions.get(i);
-					if (abstractInsnNode instanceof MethodInsnNode insnNode && insnNode.getOpcode() == Opcodes.INVOKEVIRTUAL) {
-						to = abstractInsnNode;
-						break;
-					}
-				}
+				// Go backwards until we hit an INVOKEVIRTUAL (the instruction we want to match is Axolotl#setVariant(Axolotl.Variant))
+				to = IntStream.iterate(getBreedOffspring.instructions.indexOf(upTo) - 1, i -> i >= 0, i -> i - 1).mapToObj(i -> getBreedOffspring.instructions.get(i)).filter(abstractInsnNode -> abstractInsnNode instanceof MethodInsnNode insnNode && insnNode.getOpcode() == Opcodes.INVOKEVIRTUAL).findFirst().orElse(null);
 				InsnList list = new InsnList();
 
 				Textifier printer = new Textifier();
 				TraceMethodVisitor traceMV = new TraceMethodVisitor(printer);
 				boolean adding = true;
+				// Re-add all instructions, excluding [from, to] (inclusive)
 				for (AbstractInsnNode abstractInsnNode : oldList) {
 					if (abstractInsnNode == from) adding = false;
 					if (adding) {
